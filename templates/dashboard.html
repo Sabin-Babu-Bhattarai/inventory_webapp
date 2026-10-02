@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Dashboard Overview</h2>
+    {% if current_user.role in ['Admin', 'Manager'] %}
+    <div>
+        <a href="{{ url_for('export_excel') }}" class="btn btn-success fw-bold me-2">Export Excel</a>
+        <a href="{{ url_for('export_csv') }}" class="btn btn-secondary fw-bold">Export CSV</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm card-metric p-3">
+            <small class="text-muted fw-bold">TOTAL SKUS</small>
+            <h3 class="mb-0">{{ total_items }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm card-metric p-3" style="border-left-color: #0dcaf0;">
+            <small class="text-muted fw-bold">TOTAL UNITS</small>
+            <h3 class="mb-0">{{ "{:,.2f}".format(total_units) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm card-metric p-3" style="border-left-color: #198754;">
+            <small class="text-muted fw-bold">TOTAL VALUE</small>
+            <h3 class="mb-0">${{ "{:,.2f}".format(total_value) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm card-metric p-3" style="border-left-color: #dc3545;">
+            <small class="text-muted fw-bold">LOW STOCK ALERTS</small>
+            <h3 class="mb-0">{{ low_stock_count }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white"><h5 class="mb-0">Real-Time Inventory Status</h5></div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Code</th><th>Name</th><th>Unit</th><th>Rate</th><th>Opening</th><th>In Qty</th><th>Out Qty</th><th>Remaining</th><th>Valuation</th><th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in summary %}
+                <tr>
+                    <td>{{ row.code }}</td>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.unit }}</td>
+                    <td>${{ "%.2f"|format(row.rate) }}</td>
+                    <td>{{ row.opening }}</td>
+                    <td>{{ row.in_qty }}</td>
+                    <td>{{ row.out_qty }}</td>
+                    <td class="fw-bold">{{ row.remaining }}</td>
+                    <td>${{ "%.2f"|format(row.valuation) }}</td>
+                    <td>
+                        {% if row.is_low_stock %}
+                        <span class="badge bg-danger">LOW STOCK</span>
+                        {% else %}
+                        <span class="badge bg-success">OK</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

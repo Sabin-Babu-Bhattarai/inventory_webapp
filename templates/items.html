@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white"><h5 class="mb-0">Add New Master Item</h5></div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-2"><label>Item Code</label><input type="text" name="item_code" class="form-control" required></div>
+                    <div class="mb-2"><label>Item Name</label><input type="text" name="name" class="form-control" required></div>
+                    <div class="mb-2"><label>Unit</label><input type="text" name="unit" value="Pcs" class="form-control"></div>
+                    <div class="mb-2"><label>Opening Stock</label><input type="number" step="0.01" name="opening_stock" value="0" class="form-control"></div>
+                    <div class="mb-2"><label>Unit Rate ($)</label><input type="number" step="0.01" name="rate" value="0.00" class="form-control"></div>
+                    <div class="mb-3"><label>Reorder Level</label><input type="number" step="0.01" name="reorder_level" value="10" class="form-control"></div>
+                    <button type="submit" class="btn btn-primary w-100">Save Item</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Product Catalog</h5></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr><th>ID</th><th>Code</th><th>Name</th><th>Unit</th><th>Opening</th><th>Rate</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.item_code }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.unit }}</td>
+                            <td>{{ item.opening_stock }}</td>
+                            <td>${{ "%.2f"|format(item.rate) }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editItemModal{{ item.id }}">Edit</button>
+                                {% if current_user.role == 'Admin' %}
+                                <form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete item {{ item.name }}?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <!-- Edit Item Modal -->
+                        <div class="modal fade" id="editItemModal{{ item.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="{{ url_for('edit_item', item_id=item.id) }}" method="POST">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Item: {{ item.name }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-2"><label>Item Code</label><input type="text" name="item_code" value="{{ item.item_code }}" class="form-control" required></div>
+                                            <div class="mb-2"><label>Item Name</label><input type="text" name="name" value="{{ item.name }}" class="form-control" required></div>
+                                            <div class="mb-2"><label>Unit</label><input type="text" name="unit" value="{{ item.unit }}" class="form-control"></div>
+                                            <div class="mb-2"><label>Opening Stock</label><input type="number" step="0.01" name="opening_stock" value="{{ item.opening_stock }}" class="form-control"></div>
+                                            <div class="mb-2"><label>Unit Rate ($)</label><input type="number" step="0.01" name="rate" value="{{ item.rate }}" class="form-control"></div>
+                                            <div class="mb-2"><label>Reorder Level</label><input type="number" step="0.01" name="reorder_level" value="{{ item.reorder_level }}" class="form-control"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white"><h5 class="mb-0">Record Stock OUT (Sale)</h5></div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-2">
+                        <label>Select Item</label>
+                        <select name="item_id" class="form-select" required>
+                            {% for item in items %}
+                            <option value="{{ item.id }}">{{ item.item_code }} - {{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2"><label>Date</label><input type="date" name="txn_date" class="form-control" required></div>
+                    <div class="mb-2"><label>Quantity</label><input type="number" step="0.01" name="quantity" class="form-control" required></div>
+                    <div class="mb-2"><label>Selling Rate ($)</label><input type="number" step="0.01" name="rate" class="form-control" required></div>
+                    <div class="mb-3"><label>Notes</label><input type="text" name="notes" class="form-control"></div>
+                    <button type="submit" class="btn btn-primary w-100">Record Transaction</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <form method="GET" class="row g-2 align-items-center">
+                    <div class="col-auto"><label class="col-form-label">From:</label></div>
+                    <div class="col-auto"><input type="date" name="start_date" value="{{ start_date or '' }}" class="form-control"></div>
+                    <div class="col-auto"><label class="col-form-label">To:</label></div>
+                    <div class="col-auto"><input type="date" name="end_date" value="{{ end_date or '' }}" class="form-control"></div>
+                    <div class="col-auto"><button type="submit" class="btn btn-secondary">Filter</button></div>
+                    <div class="col-auto"><a href="{{ url_for('stock_out') }}" class="btn btn-outline-secondary">Reset</a></div>
+                </form>
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Stock OUT Logs</h5></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr><th>Date</th><th>Code</th><th>Name</th><th>Qty</th><th>Rate</th><th>Total</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.txn_date }}</td><td>{{ log.item.item_code }}</td><td>{{ log.item.name }}</td><td>{{ log.quantity }}</td><td>${{ "%.2f"|format(log.rate) }}</td><td>${{ "%.2f"|format(log.total_amount) }}</td><td>{{ log.notes or '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

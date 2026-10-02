@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white"><h5 class="mb-0">Create New User Account</h5></div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-2"><label>Username</label><input type="text" name="username" class="form-control" required></div>
+                    <div class="mb-2"><label>Password</label><input type="password" name="password" class="form-control" required></div>
+                    <div class="mb-3">
+                        <label>Role</label>
+                        <select name="role" class="form-select">
+                            <option value="Staff">Staff</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Create User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">System Users</h5></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.username }}</td>
+                            <td><span class="badge bg-secondary">{{ u.role }}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editUserModal{{ u.id }}">Edit Role</button>
+                                <button class="btn btn-sm btn-outline-warning me-1" data-bs-toggle="modal" data-bs-target="#changePassModal{{ u.id }}">Password</button>
+                                {% if u.id != current_user.id %}
+                                <form action="{{ url_for('delete_user', user_id=u.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete user {{ u.username }}?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <!-- Edit Role Modal -->
+                        <div class="modal fade" id="editUserModal{{ u.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="{{ url_for('edit_user', user_id=u.id) }}" method="POST">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Role: {{ u.username }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <label class="mb-2">Select User Role</label>
+                                            <select name="role" class="form-select">
+                                                <option value="Staff" {% if u.role == 'Staff' %}selected{% endif %}>Staff</option>
+                                                <option value="Manager" {% if u.role == 'Manager' %}selected{% endif %}>Manager</option>
+                                                <option value="Admin" {% if u.role == 'Admin' %}selected{% endif %}>Admin</option>
+                                            </select>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Save Role</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Change Password Modal -->
+                        <div class="modal fade" id="changePassModal{{ u.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="{{ url_for('change_user_password', user_id=u.id) }}" method="POST">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Change Password: {{ u.username }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <label class="mb-2">New Password</label>
+                                            <input type="password" name="new_password" class="form-control" required placeholder="Enter new password">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-warning">Update Password</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
